@@ -24,7 +24,7 @@ TEXTS = {
             ["📍 Filiallar", "📞 Qo'llab-quvvatlash", "🌐 Til tanlash"],
             ["👨‍💼 Admin", "🆘 Yordam", "🗑️ Suhbatni tozalash"]
         ],
-        "savol_javob": "Ottimo Cafe haqida istalgan savolingizni yozing!\n\nMasalan:\n— Filiallar qayerda?\n— Ish vaqti qanday?\n— Qanday hujjatlar kerak?",
+        "savol_javob": "Ottimo Cafe haqida istalgan savolingizni yozing!\,
         "til_tanlash": "Tilni tanlang / Выберите язык / Choose language:",
         "til_tanlash_menu": [["🇺🇿 O'zbek tili"], ["🇷🇺 Русский язык"], ["🇬🇧 English"]],
         "til_tanlandi": "O'zbek tili tanlandi!",
