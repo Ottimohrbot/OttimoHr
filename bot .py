@@ -499,18 +499,84 @@ async def anketa_callback(update, context):
 
 # ===================== GEMINI =====================
 def ask_gemini(user_id, user_text):
-    system = get_text(user_id, "system_prompt")
+    lang = get_lang(user_id)
     history = user_sessions.get(user_id, [])
+
+    # Savol mode tekshirish
+    savol_mode = any(h.get("user") == "__savol_mode__" for h in history)
+
+    # Toza tarix (mode flaglarni olib tashlash)
+    clean = [h for h in history if h.get("user") not in ("__savol_mode__",)]
     history_text = ""
-    if history:
+    if clean:
         history_text = "\n\n" + "\n".join([
-            f"User: {h['user']}\nAgent: {h['agent']}" for h in history[-5:]])
-    full_prompt = system + history_text + f"\n\nUser: {user_text}\nAgent:"
+            f"Foydalanuvchi: {h['user']}\nAgent: {h['agent']}" for h in clean[-5:]])
+
+    ottimo_info = (
+        "Ottimo Cafe haqida ma'lumot:\n"
+        "- Toshkentda 3 ta filiali bor\n"
+        "- 1-filial: Nukus kinoteatri yonida, Shifer ko'chasi 71\n"
+        "- 2-filial: Parus ostida, Katartal ko'chasi 60A/1\n"
+        "- 3-filial: Talant International School ro'parasida, Buyuk Ipak Yo'li 31\n"
+        "- Bo'sh ish o'rinlari: Barista, Kassir, Konditer-sotuvchi\n"
+        "- Ish vaqti: Kunduzi 07:30-16:30, Kechki payt 16:00-24:00\n"
+        "- Yosh talabi: 20-35\n"
+        "- Rus tilini bilish shart\n"
+        "- Chekmaydigan va spirtli ichimlik iste'mol qilmaydigan bo'lishi kerak\n"
+        "- Probatsiya: 1 oy\n"
+        "- Maosh har 10 kunda to'lanadi\n"
+        "- Har smenada bepul ovqat beriladi\n"
+        "- Telefon: +998 99 060 33 53\n"
+        "- Telegram: @Ottimo_hr"
+    )
+
+    if lang == "ru":
+        lang_instr = "Отвечай только на русском языке."
+        restrict = "Отвечай только на вопросы об Ottimo Cafe. На другие темы говори: 'Извините, я отвечаю только на вопросы об Ottimo Cafe.'"
+    elif lang == "en":
+        lang_instr = "Reply only in English."
+        restrict = "Answer only questions about Ottimo Cafe. For other topics say: 'Sorry, I only answer questions about Ottimo Cafe.'"
+    else:
+        lang_instr = "Faqat o'zbek tilida javob ber."
+        restrict = "Faqat Ottimo Cafe haqidagi savollarga javob ber. Boshqa mavzularga: 'Kechirasiz, men faqat Ottimo Cafe haqida javob bera olaman.' de."
+
+    if savol_mode:
+        system = (
+            f"{lang_instr}\n"
+            f"Sen Ottimo Cafe uchun aqlli HR yordamchisisisan.\n"
+            f"{restrict}\n\n"
+            f"{ottimo_info}\n\n"
+            "Savollarga chiroyli, to'liq va ijodiy tarzda javob ber. "
+            "Agar foydalanuvchi filiallar so'rasa — uchala filialning manzilini batafsil ko'rsat. "
+            "Agar maosh so'rasa — barcha ma'lumotlarni ayt."
+        )
+    else:
+        system = (
+            f"{lang_instr}\n"
+            f"Sen Ottimo Cafe uchun HR agentisan.\n"
+            f"{ottimo_info}\n"
+            "Har doim do'stona va aniq javob ber."
+        )
+
+    full_prompt = system + history_text + f"\n\nFoydalanuvchi: {user_text}\nAgent:"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={GEMINI_API_KEY}"
-    r = requests.post(url, json={"contents": [{"parts": [{"text": full_prompt}]}],
-                                  "generationConfig": {"temperature": 0.7, "maxOutputTokens": 1000}}, timeout=30)
-    r.raise_for_status()
-    return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+    # 3 marta urinish
+    for attempt in range(3):
+        try:
+            r = requests.post(
+                url,
+                json={"contents": [{"parts": [{"text": full_prompt}]}],
+                      "generationConfig": {"temperature": 0.7, "maxOutputTokens": 1000}},
+                timeout=30
+            )
+            r.raise_for_status()
+            return r.json()["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception as e:
+            logger.error(f"Gemini urinish {attempt+1}: {e}")
+            if attempt < 2:
+                import time; time.sleep(2)
+    raise Exception("Gemini 3 marta ham javob bermadi")
 
 # ===================== ASOSIY =====================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -599,7 +665,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if action == "anketa":
         await start_anketa(update, context); return
     if action == "savol":
-        await update.message.reply_text(get_text(user_id, "savol_javob"), reply_markup=get_menu(user_id)); return
+        # AI mode yoqish
+        user_sessions[user_id] = [{"user": "__savol_mode__", "agent": "__savol_mode__"}]
+        lang = get_lang(user_id)
+        if lang == "ru":
+            msg = "Задайте любой вопрос об Ottimo Cafe — я отвечу!\n\nНапример:\n— Где находятся филиалы?\n— Какой график работы?\n— Какие документы нужны?"
+        elif lang == "en":
+            msg = "Ask any question about Ottimo Cafe — I'll answer!\n\nFor example:\n— Where are the branches?\n— What are the working hours?\n— What documents are needed?"
+        else:
+            msg = "Ottimo Cafe haqida istalgan savolingizni yozing — javob beraman!\n\nMasalan:\n— Filiallar qayerda joylashgan?\n— Ish vaqti qanday?\n— Qanday hujjatlar kerak?\n— Barista bo'lish uchun nima qilish kerak?"
+        await update.message.reply_text(msg, reply_markup=get_menu(user_id)); return
     if action in ["ish_vaqti", "ish_malumot", "xodimlar_muammo", "mehnat_qonun", "filiallar", "qollab"]:
         await update.message.reply_text(get_text(user_id, action), reply_markup=get_menu(user_id)); return
     if action == "admin":
