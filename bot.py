@@ -34,7 +34,20 @@ TEXTS = {
         "yordam": "Menyudan bo'lim tanlang yoki istalgan savolingizni yozing!",
         "tozalandi": "Suhbat tozalandi!",
         "xatolik": "Hozirda texnik nosozlik yuz berdi. Iltimos, @Ottimo_hr ga murojaat qiling.",
-        "filiallar": "OTTIMO CAFE FILIALLARI\n\n1. Nukus kinoteatri yonida\n   Toshkent, Shifer ko'chasi, 71\n\n2. Parus ostida\n   Toshkent, Katartal ko'chasi, 60A/1\n\n3. Talant International School ro'parasida\n   Toshkent, Mirzo Ulug'bek tumani, Buyuk Ipak Yo'li, 31\n\nTelefon: +998 99 060 33 53\nTelegram: @Ottimo_hr",
+        "filiallar": (
+            "OTTIMO CAFE FILIALLARI\n\n"
+            "1. Nukus kinoteatri yonida\n"
+            "   Toshkent, Shifer ko'chasi, 71\n"
+            "   https://yandex.uz/maps/org/144255252741/?ll=69.218418%2C41.350783&z=16.54\n\n"
+            "2. Parus ostida\n"
+            "   Toshkent, Katartal ko'chasi, 60A/1\n"
+            "   https://yandex.uz/maps/org/45535920435/?ll=69.211087%2C41.292054&z=16.54\n\n"
+            "3. Talant International School ro'parasida\n"
+            "   Toshkent, Mirzo Ulug'bek tumani, Buyuk Ipak Yo'li, 31\n"
+            "   https://yandex.uz/maps/10335/tashkent/?ll=69.293312%2C41.313048&mode=poi&poi%5Bpoint%5D=69.293235%2C41.313153&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D67180596093&z=19.79\n\n"
+            "Telefon: +998 99 060 33 53\n"
+            "Telegram: @Ottimo_hr"
+        ),
         "qollab": "Qo'llab-quvvatlash:\n\nTelefon: +998 99 060 33 53\nTelegram: @Ottimo_hr",
         "anketa_boshlash": "OTTIMO CAFE — ISH UCHUN ARIZA\n\nJami {} ta savol.\nBekor qilish: /bekor\n\n",
         "bekor": "Ariza bekor qilindi.",
@@ -68,7 +81,7 @@ TEXTS = {
         "yordam": "Выберите раздел из меню или задайте вопрос!",
         "tozalandi": "Чат очищен!",
         "xatolik": "Произошла техническая ошибка. Обратитесь к @Ottimo_hr.",
-        "filiallar": "ФИЛИАЛЫ OTTIMO CAFE\n\n1. У кинотеатра Нукус\n   Ташкент, ул. Шифернур, 71\n\n2. Под Парусом\n   Ташкент, ул. Катартал, 60А/1\n\n3. Напротив Talant International School\n   Ташкент, Мирзо-Улугбекский р-н, Buyuk Ipak Yoli, 31\n\nТелефон: +998 99 060 33 53\nTelegram: @Ottimo_hr",
+        "filiallar": "ФИЛИАЛЫ OTTIMO CAFE\n\n1. У кинотеатра Нукус\n   Ташкент, ул. Шифернур, 71\n   https://yandex.uz/maps/org/144255252741/?ll=69.218418%2C41.350783&z=16.54\n\n2. Под Парусом\n   Ташкент, ул. Катартал, 60А/1\n   https://yandex.uz/maps/org/45535920435/?ll=69.211087%2C41.292054&z=16.54\n\n3. Напротив Talant International School\n   Ташкент, Мирзо-Улугбекский р-н, Buyuk Ipak Yoli, 31\n   https://yandex.uz/maps/10335/tashkent/?ll=69.293312%2C41.313048&mode=poi&poi%5Bpoint%5D=69.293235%2C41.313153&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D67180596093&z=19.79\n\nТел: +998 99 060 33 53\nTelegram: @Ottimo_hr",
         "qollab": "Служба поддержки:\n\nТелефон: +998 99 060 33 53\nTelegram: @Ottimo_hr",
         "anketa_boshlash": "OTTIMO CAFE — АНКЕТА ДЛЯ ТРУДОУСТРОЙСТВА\n\nВсего {} вопросов.\nДля отмены напишите /bekor\n\n",
         "bekor": "Анкета отменена.",
@@ -102,7 +115,7 @@ TEXTS = {
         "yordam": "Choose a section from the menu or ask any question!",
         "tozalandi": "Chat cleared!",
         "xatolik": "Technical error occurred. Please contact @Ottimo_hr.",
-        "filiallar": "OTTIMO CAFE BRANCHES\n\n1. Near Nukus Cinema\n   Tashkent, Shifernur St., 71\n\n2. Under Parus\n   Tashkent, Katartal St., 60A/1\n\n3. Opposite Talant International School\n   Tashkent, Mirzo-Ulugbek district, Buyuk Ipak Yoli, 31\n\nPhone: +998 99 060 33 53\nTelegram: @Ottimo_hr",
+        "filiallar": "OTTIMO CAFE BRANCHES\n\n1. Near Nukus Cinema\n   Tashkent, Shifernur St., 71\n   https://yandex.uz/maps/org/144255252741/?ll=69.218418%2C41.350783&z=16.54\n\n2. Under Parus\n   Tashkent, Katartal St., 60A/1\n   https://yandex.uz/maps/org/45535920435/?ll=69.211087%2C41.292054&z=16.54\n\n3. Opposite Talant International School\n   Tashkent, Mirzo-Ulugbek district, Buyuk Ipak Yoli, 31\n   https://yandex.uz/maps/10335/tashkent/?ll=69.293312%2C41.313048&mode=poi&poi%5Bpoint%5D=69.293235%2C41.313153&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D67180596093&z=19.79\n\nPhone: +998 99 060 33 53\nTelegram: @Ottimo_hr",
         "qollab": "Support:\n\nPhone: +998 99 060 33 53\nTelegram: @Ottimo_hr",
         "anketa_boshlash": "OTTIMO CAFE — JOB APPLICATION\n\nTotal {} questions.\nTo cancel type /bekor\n\n",
         "bekor": "Application cancelled.",
