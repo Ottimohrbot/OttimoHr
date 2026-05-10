@@ -5,17 +5,17 @@ import sqlite3
 from datetime import datetime
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
- 
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
- 
+
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 ADMIN_USERNAME = "mr_jalilov7"
 ADMIN_CHAT_ID = 206004279
 ADMIN2_USERNAME = "Ottimo_hr"
 ADMIN2_CHAT_ID = 8134379339
- 
+
 # ===================== TIL SOZLAMALARI =====================
 TEXTS = {
     "uz": {
@@ -121,28 +121,28 @@ TEXTS = {
         "system_prompt": "You are an HR assistant for Ottimo Cafe. Reply only in English. Only answer questions about Ottimo Cafe. For other questions say: 'Sorry, I can only answer questions about Ottimo Cafe'.\n\nAbout Ottimo:\n- 3 branches: Shifernur 71, Katartal 60A/1, Buyuk Ipak Yoli 31\n- Vacancies: Barista, Cashier, Pastry seller\n- Hours: 07:30-16:30 and 16:00-24:00\n- Age: 20-35, Russian required\n- Salary every 10 days\n- Phone: +998 99 060 33 53, @Ottimo_hr\nBe friendly and creative.",
     }
 }
- 
+
 # Foydalanuvchi tillari
 user_lang = {}
 user_sessions = {}
 user_anketa = {}
 admin_state = {}
- 
+
 def get_lang(user_id):
     return user_lang.get(user_id, "uz")
- 
+
 def get_text(user_id, key):
     lang = get_lang(user_id)
     return TEXTS[lang].get(key, TEXTS["uz"].get(key, ""))
- 
+
 def get_menu(user_id):
     lang = get_lang(user_id)
     return ReplyKeyboardMarkup(TEXTS[lang]["menu"], resize_keyboard=True)
- 
+
 def get_smena_menu(user_id):
     lang = get_lang(user_id)
     return ReplyKeyboardMarkup(TEXTS[lang]["smena_menu"], resize_keyboard=True, one_time_keyboard=True)
- 
+
 # ===================== DATABASE =====================
 def init_db():
     conn = sqlite3.connect("ottimo.db")
@@ -163,7 +163,7 @@ def init_db():
     )''')
     conn.commit()
     conn.close()
- 
+
 def db_query(sql, params=(), fetchall=False, fetchone=False):
     conn = sqlite3.connect("ottimo.db")
     c = conn.cursor()
@@ -175,7 +175,7 @@ def db_query(sql, params=(), fetchall=False, fetchone=False):
         result = c.fetchone(); conn.close(); return result
     conn.close()
     return c.lastrowid
- 
+
 # ===================== ANKETA SAVOLLARI =====================
 ANKETA_STEPS = {
     "uz": [
@@ -278,20 +278,20 @@ ANKETA_STEPS = {
         ("smena",               "⏰ 31/31 — Which shift do you prefer?\n\n☀️ Daytime (07:30-16:30)\n🌙 Evening (16:00-24:00)\n🔄 Either shift"),
     ]
 }
- 
+
 ADMIN_MENU = ReplyKeyboardMarkup([
     ["👥 Xodimlar ro'yxati", "➕ Xodim qo'shish"],
     ["⚠️ Kechikish belgilash", "📋 Arizalar ro'yxati"],
     ["📊 Statistika", "🔙 Bosh menyu"]
 ], resize_keyboard=True)
- 
+
 ADMIN_ADD_STEPS = [
     ("ism",     "👤 Xodimning ismi:"),
     ("lavozim", "🎯 Lavozimi:"),
     ("telefon", "📱 Telefon:"),
     ("smena",   "⏰ Smenasi:"),
 ]
- 
+
 # ===================== ADMIN =====================
 async def show_xodimlar(update, context):
     xodimlar = db_query("SELECT id, ism, lavozim, smena FROM xodimlar WHERE holat='aktiv'", fetchall=True)
@@ -301,7 +301,7 @@ async def show_xodimlar(update, context):
     for x in xodimlar:
         text += f"#{x[0]} {x[1]} | {x[2]} | {x[3]}\n"
     await update.message.reply_text(text, reply_markup=ADMIN_MENU)
- 
+
 async def show_statistika(update, context):
     jami = db_query("SELECT COUNT(*) FROM xodimlar WHERE holat='aktiv'", fetchone=True)[0]
     arizalar = db_query("SELECT COUNT(*) FROM arizalar WHERE holat='kutilmoqda'", fetchone=True)[0]
@@ -309,7 +309,7 @@ async def show_statistika(update, context):
     await update.message.reply_text(
         f"STATISTIKA\n\nXodimlar: {jami}\nArizalar: {arizalar}\nKechikishlar: {kechikish}",
         reply_markup=ADMIN_MENU)
- 
+
 async def show_arizalar(update, context):
     arizalar = db_query("SELECT id, ism, telefon, lavozim, smena, sana FROM arizalar WHERE holat='kutilmoqda'", fetchall=True)
     if not arizalar:
@@ -318,12 +318,12 @@ async def show_arizalar(update, context):
     for a in arizalar:
         text += f"#{a[0]} {a[1]} | {a[2]} | {a[3]} | {a[4]} | {a[5]}\n"
     await update.message.reply_text(text, reply_markup=ADMIN_MENU)
- 
+
 async def start_add_xodim(update, context):
     user_id = update.effective_user.id
     admin_state[user_id] = {"action": "add_xodim", "step": 0, "data": {}}
     await update.message.reply_text(ADMIN_ADD_STEPS[0][1], reply_markup=ReplyKeyboardRemove())
- 
+
 async def process_add_xodim(update, context):
     user_id = update.effective_user.id
     state = admin_state[user_id]
@@ -339,14 +339,14 @@ async def process_add_xodim(update, context):
                  (data['ism'], data['lavozim'], data['telefon'], data['smena'], datetime.now().strftime("%d.%m.%Y")))
         admin_state.pop(user_id, None)
         await update.message.reply_text(f"{data['ism']} qo'shildi!", reply_markup=ADMIN_MENU)
- 
+
 async def start_kechikish(update, context):
     xodimlar = db_query("SELECT id, ism FROM xodimlar WHERE holat='aktiv'", fetchall=True)
     if not xodimlar:
         await update.message.reply_text("Xodimlar yo'q.", reply_markup=ADMIN_MENU); return
     keyboard = [[InlineKeyboardButton(x[1], callback_data=f"kechik_{x[0]}")] for x in xodimlar]
     await update.message.reply_text("Qaysi xodim kechikdi?", reply_markup=InlineKeyboardMarkup(keyboard))
- 
+
 async def kechikish_callback(update, context):
     query = update.callback_query
     await query.answer()
@@ -355,7 +355,7 @@ async def kechikish_callback(update, context):
     db_query("INSERT INTO kechikishlar (xodim_id, sana, minut) VALUES (?,?,?)",
              (xodim_id, datetime.now().strftime("%d.%m.%Y"), 15))
     await query.edit_message_text(f"{xodim[0]} — jarima: 50 000 so'm")
- 
+
 # ===================== ANKETA =====================
 async def start_anketa(update, context):
     user_id = update.effective_user.id
@@ -365,23 +365,23 @@ async def start_anketa(update, context):
     await update.message.reply_text(
         get_text(user_id, "anketa_boshlash").format(len(steps)) + steps[0][1],
         reply_markup=ReplyKeyboardRemove())
- 
+
 async def process_anketa(update, context):
     user_id = update.effective_user.id
     lang = get_lang(user_id)
     text = update.message.text
     steps = ANKETA_STEPS[lang]
- 
+
     if text == "/bekor":
         user_anketa.pop(user_id, None)
         await update.message.reply_text(get_text(user_id, "bekor"), reply_markup=get_menu(user_id)); return
- 
+
     step_data = user_anketa[user_id]
     current_step = step_data["step"]
     key, _ = steps[current_step]
     step_data["data"][key] = text
     next_step = current_step + 1
- 
+
     if next_step < len(steps):
         step_data["step"] = next_step
         next_key, next_question = steps[next_step]
@@ -394,7 +394,7 @@ async def process_anketa(update, context):
         db_query("INSERT INTO arizalar (ism, telefon, lavozim, smena, sana) VALUES (?,?,?,?,?)",
                  (data.get('ism_familiya_sharif'), data.get('telefon'), "—",
                   data.get('smena'), datetime.now().strftime("%d.%m.%Y")))
- 
+
         summary = get_text(user_id, "anketa_tayyor")
         fields = [
             ("Ism / Name / Имя", "ism_familiya_sharif"),
@@ -432,20 +432,20 @@ async def process_anketa(update, context):
         for label, key in fields:
             val = data.get(key, "—")
             summary += f"{label}: {val}\n"
- 
+
         summary += f"\n{get_text(user_id, 'tasdiqlash')}"
- 
+
         confirm_keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(get_text(user_id, "tasdiq_btn"), callback_data="anketa_confirm"),
             InlineKeyboardButton(get_text(user_id, "bekor_btn"), callback_data="anketa_cancel")
         ]])
         await update.message.reply_text(summary, reply_markup=confirm_keyboard)
- 
+
 async def anketa_callback(update, context):
     query = update.callback_query
     await query.answer()
     user_id = query.from_user.id
- 
+
     if query.data == "anketa_confirm":
         data = user_anketa.get(user_id, {}).get("data", {})
         username = query.from_user.username or "username_yoq"
@@ -471,7 +471,7 @@ async def anketa_callback(update, context):
         for label, key in fields:
             msg += f"{label}: {data.get(key, '—')}\n"
         msg += f"\nTelegram: @{username}"
- 
+
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=msg)
         except Exception as e:
@@ -480,7 +480,7 @@ async def anketa_callback(update, context):
             await context.bot.send_message(chat_id=ADMIN2_CHAT_ID, text=msg)
         except Exception as e:
             logger.error(f"Admin 2 ga xato: {e}")
- 
+
         user_anketa.pop(user_id, None)
         try:
             await query.message.delete()
@@ -490,7 +490,7 @@ async def anketa_callback(update, context):
             chat_id=user_id,
             text=get_text(user_id, "rahmat"),
             reply_markup=get_menu(user_id))
- 
+
     elif query.data == "anketa_cancel":
         user_anketa.pop(user_id, None)
         await query.edit_message_text(get_text(user_id, "bekor_xabar"))
@@ -498,22 +498,22 @@ async def anketa_callback(update, context):
             chat_id=user_id,
             text=get_text(user_id, "bosh_menyu"),
             reply_markup=get_menu(user_id))
- 
+
 # ===================== GEMINI =====================
 def ask_gemini(user_id, user_text):
     lang = get_lang(user_id)
     history = user_sessions.get(user_id, [])
- 
+
     # Savol mode tekshirish
     savol_mode = any(h.get("user") == "__savol_mode__" for h in history)
- 
+
     # Toza tarix (mode flaglarni olib tashlash)
     clean = [h for h in history if h.get("user") not in ("__savol_mode__",)]
     history_text = ""
     if clean:
         history_text = "\n\n" + "\n".join([
             f"Foydalanuvchi: {h['user']}\nAgent: {h['agent']}" for h in clean[-5:]])
- 
+
     ottimo_info = (
         "Ottimo Cafe haqida ma'lumot:\n"
         "- Toshkentda 3 ta filiali bor\n"
@@ -531,7 +531,7 @@ def ask_gemini(user_id, user_text):
         "- Telefon: +998 99 060 33 53\n"
         "- Telegram: @Ottimo_hr"
     )
- 
+
     if lang == "ru":
         lang_instr = "Отвечай только на русском языке."
         restrict = "Отвечай только на вопросы об Ottimo Cafe. На другие темы говори: 'Извините, я отвечаю только на вопросы об Ottimo Cafe.'"
@@ -541,7 +541,7 @@ def ask_gemini(user_id, user_text):
     else:
         lang_instr = "Faqat o'zbek tilida javob ber."
         restrict = "Faqat Ottimo Cafe haqidagi savollarga javob ber. Boshqa mavzularga: 'Kechirasiz, men faqat Ottimo Cafe haqida javob bera olaman.' de."
- 
+
     if savol_mode:
         system = (
             f"{lang_instr}\n"
@@ -559,10 +559,10 @@ def ask_gemini(user_id, user_text):
             f"{ottimo_info}\n"
             "Har doim do'stona va aniq javob ber."
         )
- 
+
     full_prompt = system + history_text + f"\n\nFoydalanuvchi: {user_text}\nAgent:"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={GEMINI_API_KEY}"
- 
+
     # 3 marta urinish
     for attempt in range(3):
         try:
@@ -579,7 +579,7 @@ def ask_gemini(user_id, user_text):
             if attempt < 2:
                 import time; time.sleep(2)
     raise Exception("Gemini 3 marta ham javob bermadi")
- 
+
 # ===================== ASOSIY =====================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -587,16 +587,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         get_text(user_id, "welcome").format(user_name),
         reply_markup=get_menu(user_id))
- 
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
- 
+
     if user_id in user_anketa:
         await process_anketa(update, context); return
     if user_id in admin_state and admin_state[user_id].get("action") == "add_xodim":
         await process_add_xodim(update, context); return
- 
+
     # Admin tugmalari
     admin_map = {
         "👥 Xodimlar ro'yxati": show_xodimlar,
@@ -609,13 +609,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await admin_map[user_text](update, context); return
     if user_text == "🔙 Bosh menyu":
         await update.message.reply_text(get_text(user_id, "bosh_menyu"), reply_markup=get_menu(user_id)); return
- 
+
     # Til tanlash
     if user_text in ["🌐 Til tanlash", "🌐 Выбор языка", "🌐 Language"]:
         lang_menu = ReplyKeyboardMarkup(
             TEXTS["uz"]["til_tanlash_menu"], resize_keyboard=True, one_time_keyboard=True)
         await update.message.reply_text(get_text(user_id, "til_tanlash"), reply_markup=lang_menu); return
- 
+
     if user_text == "🇺🇿 O'zbek tili":
         user_lang[user_id] = "uz"
         await update.message.reply_text(TEXTS["uz"]["til_tanlandi"], reply_markup=get_menu(user_id)); return
@@ -625,7 +625,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_text == "🇬🇧 English":
         user_lang[user_id] = "en"
         await update.message.reply_text(TEXTS["en"]["til_tanlandi"], reply_markup=get_menu(user_id)); return
- 
+
     # Asosiy tugmalar — barcha tillarda
     all_keys = {
         "👷 Ishchi qabul qilish": "anketa",
@@ -661,22 +661,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🗑️ Очистить чат": "tozala",
         "🗑️ Clear Chat": "tozala",
     }
- 
+
     action = all_keys.get(user_text)
- 
+
     if action == "anketa":
         await start_anketa(update, context); return
+
     if action == "savol":
-        # AI mode yoqish
         user_sessions[user_id] = [{"user": "__savol_mode__", "agent": "__savol_mode__"}]
         lang = get_lang(user_id)
         if lang == "ru":
-            msg = "Задайте любой вопрос об Ottimo Cafe — я отвечу!\n\nНапример:\n— Где находятся филиалы?\n— Какой график работы?\n— Какие документы нужны?"
+            msg = "Задайте любой вопрос об Ottimo Cafe — я отвечу!"
         elif lang == "en":
-            msg = "Ask any question about Ottimo Cafe — I'll answer!\n\nFor example:\n— Where are the branches?\n— What are the working hours?\n— What documents are needed?"
+            msg = "Ask any question about Ottimo Cafe — I'll answer!"
         else:
-            msg = "Ottimo Cafe haqida istalgan savolingizni yozing — javob beraman!\n\nMasalan:\n— Filiallar qayerda joylashgan?\n— Ish vaqti qanday?\n— Qanday hujjatlar kerak?\n— Barista bo'lish uchun nima qilish kerak?"
+            msg = "Ottimo Cafe haqida savolingizni yozing — javob beraman!"
         await update.message.reply_text(msg, reply_markup=get_menu(user_id)); return
+
     if action in ["ish_vaqti", "ish_malumot", "xodimlar_muammo", "mehnat_qonun", "filiallar", "qollab"]:
         await update.message.reply_text(get_text(user_id, action), reply_markup=get_menu(user_id)); return
     if action == "admin":
@@ -686,19 +687,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if action == "tozala":
         user_sessions[user_id] = []
         await update.message.reply_text(get_text(user_id, "tozalandi"), reply_markup=get_menu(user_id)); return
- 
-    # Erkin savol — Gemini
+
+    # Har qanday matn — Gemini ga yuborish (savol mode ham, erkin savol ham)
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
     if user_id not in user_sessions:
         user_sessions[user_id] = []
     try:
         reply = ask_gemini(user_id, user_text)
+        # Faqat haqiqiy savol-javobni saqlash (mode flaglarni emas)
+        user_sessions[user_id] = [h for h in user_sessions[user_id] if h.get("user") != "__savol_mode__"]
         user_sessions[user_id].append({"user": user_text, "agent": reply})
         await update.message.reply_text(reply, reply_markup=get_menu(user_id))
     except Exception as e:
         logger.error(f"Xato: {e}")
         await update.message.reply_text(get_text(user_id, "xatolik"), reply_markup=get_menu(user_id))
- 
+
 def main():
     init_db()
     app = Application.builder().token(TELEGRAM_TOKEN).build()
@@ -708,6 +711,6 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     logger.info("Bot ishga tushdi!")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
- 
+
 if __name__ == "__main__":
     main()
