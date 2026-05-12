@@ -21,10 +21,10 @@ TEXTS = {
     "uz": {
         "welcome": "Salom, {}!\n\nOttimo Cafe HR botiga xush kelibsiz!\n\nQuyidagi bo'limlardan birini tanlang:",
         "menu": [
-            ["👷 Ishchi qabul qilish", "❓ Savol va Javob", "⏰ Ish vaqti"],
-            ["📊 Ish ma'lumotlari", "🤝 Xodimlar muammolari", "⚖️ Mehnat qonunlari"],
-            ["📍 Filiallar", "📞 Qo'llab-quvvatlash", "🌐 Til tanlash"],
-            ["👨‍💼 Admin", "🆘 Yordam", "🗑️ Suhbatni tozalash"]
+            ["👷 Ishchi qabul qilish", "🌐 Til tanlash",  "⏰ Ish vaqti"],
+            ["📊 Ish ma'lumotlari", "🤝 Xodimlar muammolari", ],
+            ["📍 Filiallar", "📞 Qo'llab-quvvatlash","👨‍💼 Admin", ],
+            
         ],
         "savol_javob": "Ottimo Cafe haqida istalgan savolingizni yozing!\n\nMasalan:\n— Filiallar qayerda?\n— Ish vaqti qanday?\n— Qanday hujjatlar kerak?",
         "til_tanlash": "Tilni tanlang / Выберите язык / Choose language:",
@@ -68,12 +68,11 @@ TEXTS = {
     "ru": {
         "welcome": "Привет, {}!\n\nДобро пожаловать в HR бот Ottimo Cafe!\n\nВыберите один из разделов:",
         "menu": [
-            ["👷 Приём на работу", "❓ Вопрос и Ответ", "⏰ Рабочее время"],
-            ["📊 О работе", "🤝 Проблемы сотрудников", "⚖️ Трудовое законодательство"],
-            ["📍 Филиалы", "📞 Поддержка", "🌐 Выбор языка"],
-            ["👨‍💼 Админ", "🆘 Помощь", "🗑️ Очистить чат"]
+            ["👷 Приём на работу","🌐 Выбор языка , "⏰ Рабочее время"],
+            ["📊 О работе", "🤝 Проблемы сотрудников", ],
+            ["📍 Филиалы", "📞 Поддержка", "👨‍💼 Админ"],
+           
         ],
-        "savol_javob": "Задайте любой вопрос об Ottimo Cafe!\n\nНапример:\n— Где находятся филиалы?\n— Какой график работы?\n— Какие документы нужны?",
         "til_tanlash": "Tilni tanlang / Выберите язык / Choose language:",
         "til_tanlash_menu": [["🇺🇿 O'zbek tili"], ["🇷🇺 Русский язык"], ["🇬🇧 English"]],
         "til_tanlandi": "Выбран русский язык!",
@@ -102,10 +101,9 @@ TEXTS = {
     "en": {
         "welcome": "Hello, {}!\n\nWelcome to Ottimo Cafe HR Bot!\n\nPlease choose a section:",
         "menu": [
-            ["👷 Apply for Job", "❓ Q&A", "⏰ Working Hours"],
+            ["👷 Apply for Job","🌐 Language" , "⏰ Working Hours"],
             ["📊 About Work", "🤝 Employee Issues", "⚖️ Labor Law"],
-            ["📍 Branches", "📞 Support", "🌐 Language"],
-            ["👨‍💼 Admin", "🆘 Help", "🗑️ Clear Chat"]
+            ["📍 Branches", "📞 Support", "👨‍💼 Admin"],
         ],
         "savol_javob": "Ask any question about Ottimo Cafe!\n\nFor example:\n— Where are the branches?\n— What are the working hours?\n— What documents are needed?",
         "til_tanlash": "Tilni tanlang / Выберите язык / Choose language:",
