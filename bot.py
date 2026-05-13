@@ -21,10 +21,9 @@ TEXTS = {
     "uz": {
         "welcome": "Salom, {}!\n\nOttimo Cafe HR botiga xush kelibsiz!\n\nQuyidagi bo'limlardan birini tanlang:",
         "menu": [
-            ["👷 Ishchi qabul qilish", "❓ Savol va Javob", "⏰ Ish vaqti"],
-            ["📊 Ish ma'lumotlari", "🤝 Xodimlar muammolari", "⚖️ Mehnat qonunlari"],
-            ["📍 Filiallar", "📞 Qo'llab-quvvatlash", "🌐 Til tanlash"],
-            ["👨‍💼 Admin", "🆘 Yordam", "🗑️ Suhbatni tozalash"]
+            ["👷 Ishchi qabul qilish", "🌐 Til tanlash", "⏰ Ish vaqti"],
+            ["📊 Ish ma'lumotlari", "🤝 Xodimlar muammolari", "📍 Filiallar"],
+            ["📞 Qo'llab-quvvatlash", "👨‍💼 Admin", "🗑️ Suhbatni tozalash"]
         ],
         "savol_javob": "Ottimo Cafe haqida istalgan savolingizni yozing!\n\nMasalan:\n— Filiallar qayerda?\n— Ish vaqti qanday?\n— Qanday hujjatlar kerak?",
         "til_tanlash": "Tilni tanlang / Выберите язык / Choose language:",
@@ -68,10 +67,9 @@ TEXTS = {
     "ru": {
         "welcome": "Привет, {}!\n\nДобро пожаловать в HR бот Ottimo Cafe!\n\nВыберите один из разделов:",
         "menu": [
-            ["👷 Приём на работу", "❓ Вопрос и Ответ", "⏰ Рабочее время"],
-            ["📊 О работе", "🤝 Проблемы сотрудников", "⚖️ Трудовое законодательство"],
-            ["📍 Филиалы", "📞 Поддержка", "🌐 Выбор языка"],
-            ["👨‍💼 Админ", "🆘 Помощь", "🗑️ Очистить чат"]
+            ["👷 Приём на работу", "🌐 Выбор языка", "⏰ Рабочее время"],
+            ["📊 О работе", "🤝 Проблемы сотрудников", "📍 Филиалы"],
+            ["📞 Поддержка", "👨‍💼 Админ", "🗑️ Очистить чат"]
         ],
         "savol_javob": "Задайте любой вопрос об Ottimo Cafe!\n\nНапример:\n— Где находятся филиалы?\n— Какой график работы?\n— Какие документы нужны?",
         "til_tanlash": "Tilni tanlang / Выберите язык / Choose language:",
@@ -102,10 +100,9 @@ TEXTS = {
     "en": {
         "welcome": "Hello, {}!\n\nWelcome to Ottimo Cafe HR Bot!\n\nPlease choose a section:",
         "menu": [
-            ["👷 Apply for Job", "❓ Q&A", "⏰ Working Hours"],
-            ["📊 About Work", "🤝 Employee Issues", "⚖️ Labor Law"],
-            ["📍 Branches", "📞 Support", "🌐 Language"],
-            ["👨‍💼 Admin", "🆘 Help", "🗑️ Clear Chat"]
+            ["👷 Apply for Job", "🌐 Language", "⏰ Working Hours"],
+            ["📊 About Work", "🤝 Employee Issues", "📍 Branches"],
+            ["📞 Support", "👨‍💼 Admin", "🗑️ Clear Chat"]
         ],
         "savol_javob": "Ask any question about Ottimo Cafe!\n\nFor example:\n— Where are the branches?\n— What are the working hours?\n— What documents are needed?",
         "til_tanlash": "Tilni tanlang / Выберите язык / Choose language:",
@@ -597,9 +594,11 @@ def ask_gemini(user_id, user_text):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_name = update.effective_user.first_name or "Foydalanuvchi"
+    lang_menu = ReplyKeyboardMarkup(
+        TEXTS["uz"]["til_tanlash_menu"], resize_keyboard=True, one_time_keyboard=True)
     await update.message.reply_text(
-        get_text(user_id, "welcome").format(user_name),
-        reply_markup=get_menu(user_id))
+        f"Salom, {user_name}!\n\nIltimos, tilni tanlang:\nПожалуйста, выберите язык:\nPlease choose language:",
+        reply_markup=lang_menu)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -724,6 +723,9 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     logger.info("Bot ishga tushdi!")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
