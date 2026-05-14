@@ -604,10 +604,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
 
+    # 1. ANKETA YOKI ADMIN JARAYONI (Agar foydalanuvchi hozir ariza to'ldirayotgan bo'lsa)
     if user_id in user_anketa:
-        await process_anketa(update, context); return
+        await process_anketa(update, context)
+        return
     if user_id in admin_state and admin_state[user_id].get("action") == "add_xodim":
-        await process_add_xodim(update, context); return
+        await process_add_xodim(update, context)
+        return
 
     # Admin tugmalari
     admin_map = {
