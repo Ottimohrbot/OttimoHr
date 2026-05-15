@@ -13,8 +13,6 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 ADMIN_USERNAME = "mr_jalilov7"
 ADMIN_CHAT_ID = 206004279
-ADMIN2_USERNAME = "Ottimo_hr"
-ADMIN2_CHAT_ID = 8134379339
 
 # ===================== TIL SOZLAMALARI =====================
 TEXTS = {
@@ -484,12 +482,9 @@ async def anketa_callback(update, context):
 
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=msg)
+            logger.info(f"Admin ga xabar yuborildi")
         except Exception as e:
-            logger.error(f"Admin 1 ga xato: {e}")
-        try:
-            await context.bot.send_message(chat_id=ADMIN2_CHAT_ID, text=msg)
-        except Exception as e:
-            logger.error(f"Admin 2 ga xato: {e}")
+            logger.error(f"Admin ga xato: {e}")
 
         user_anketa.pop(user_id, None)
         try:
@@ -604,13 +599,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     user_text = update.message.text
 
-    # 1. ANKETA YOKI ADMIN JARAYONI (Agar foydalanuvchi hozir ariza to'ldirayotgan bo'lsa)
     if user_id in user_anketa:
-        await process_anketa(update, context)
-        return
+        await process_anketa(update, context); return
     if user_id in admin_state and admin_state[user_id].get("action") == "add_xodim":
-        await process_add_xodim(update, context)
-        return
+        await process_add_xodim(update, context); return
 
     # Admin tugmalari
     admin_map = {
@@ -726,9 +718,6 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     logger.info("Bot ishga tushdi!")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
-
-if __name__ == "__main__":
-    main()
 
 if __name__ == "__main__":
     main()
