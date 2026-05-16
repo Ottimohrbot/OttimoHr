@@ -13,7 +13,8 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 ADMIN_USERNAME = "mr_jalilov7"
 ADMIN_CHAT_ID = 206004279
-
+ADMIN_USERNAME = "@Ottimo_hr"
+ADMIN_CHAT_ID = 8134379339
 # ===================== TIL SOZLAMALARI =====================
 TEXTS = {
     "uz": {
