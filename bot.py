@@ -14,10 +14,6 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 ADMIN_USERNAME = "mr_jalilov7"
 ADMIN_CHAT_ID = 206004279
 
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-ADMIN_USERNAME = "@Ottimo_hr"
-ADMIN_CHAT_ID = 8134379339
 # ===================== TIL SOZLAMALARI =====================
 TEXTS = {
     "uz": {
@@ -221,7 +217,8 @@ ANKETA_STEPS = {
         ("oldingi_maosh",       "💵 28/31 — Oxirgi ish joyingizda qancha maosh olgan edingiz?"),
         ("kutilayotgan_maosh",  "💰 29/31 — Bizdan qancha maosh kutasiz?"),
         ("ishlash_muddati",     "📆 30/31 — Bizda qancha muddat ishlashni rejalashtirasiz?"),
-        ("smena",               "⏰ 31/31 — Qaysi vaqtda ishlashni xohlaysiz?\n\n☀️ Kunduzi (07:30-16:30)\n🌙 Kechki payt (16:00-24:00)\n🔄 Ikkalasi ham bo'ladi"),
+        ("smena",               "⏰ 31/32 — Qaysi vaqtda ishlashni xohlaysiz?\n\n☀️ Kunduzi (07:30-16:30)\n🌙 Kechki payt (16:00-24:00)\n🔄 Ikkalasi ham bo'ladi"),
+        ("rasm",                "📸 32/32 — Shaxsiy rasmingizni yuboring (3x4 razmer):\n\nIltimos, yuz ko'rinadigan, aniq va rasmiy suratni yuboring."),
     ],
     "ru": [
         ("ism_familiya_sharif", "👤 1/31 — Введите Имя, Фамилию и Отчество:\n(Например: Ибрагим Каримов Алиевич)"),
@@ -381,17 +378,29 @@ async def start_anketa(update, context):
 async def process_anketa(update, context):
     user_id = update.effective_user.id
     lang = get_lang(user_id)
-    text = update.message.text
     steps = ANKETA_STEPS[lang]
-
-    if text == "/bekor":
-        user_anketa.pop(user_id, None)
-        await update.message.reply_text(get_text(user_id, "bekor"), reply_markup=get_menu(user_id)); return
-
     step_data = user_anketa[user_id]
     current_step = step_data["step"]
     key, _ = steps[current_step]
-    step_data["data"][key] = text
+
+    # Rasm qabul qilish
+    if key == "rasm":
+        if update.message.photo:
+            photo_id = update.message.photo[-1].file_id
+            step_data["data"]["rasm"] = photo_id
+            step_data["data"]["rasm_file_id"] = photo_id
+        elif update.message.text == "/bekor":
+            user_anketa.pop(user_id, None)
+            await update.message.reply_text(get_text(user_id, "bekor"), reply_markup=get_menu(user_id)); return
+        else:
+            await update.message.reply_text("Iltimos, rasm yuboring (3x4 razmer):", reply_markup=ReplyKeyboardRemove()); return
+    else:
+        text = update.message.text
+        if text == "/bekor":
+            user_anketa.pop(user_id, None)
+            await update.message.reply_text(get_text(user_id, "bekor"), reply_markup=get_menu(user_id)); return
+        step_data["data"][key] = text
+
     next_step = current_step + 1
 
     if next_step < len(steps):
@@ -399,6 +408,8 @@ async def process_anketa(update, context):
         next_key, next_question = steps[next_step]
         if next_key == "smena":
             await update.message.reply_text(next_question, reply_markup=get_smena_menu(user_id))
+        elif next_key == "rasm":
+            await update.message.reply_text(next_question, reply_markup=ReplyKeyboardRemove())
         else:
             await update.message.reply_text(next_question, reply_markup=ReplyKeyboardRemove())
     else:
@@ -487,6 +498,14 @@ async def anketa_callback(update, context):
         try:
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=msg)
             logger.info(f"Admin ga xabar yuborildi")
+            # Rasmni ham yuborish
+            rasm_id = data.get("rasm_file_id")
+            if rasm_id:
+                await context.bot.send_photo(
+                    chat_id=ADMIN_CHAT_ID,
+                    photo=rasm_id,
+                    caption=f"Ariza beruvchi rasmi: {data.get('ism_familiya_sharif', '')}"
+                )
         except Exception as e:
             logger.error(f"Admin ga xato: {e}")
 
@@ -598,6 +617,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"Salom, {user_name}!\n\nIltimos, tilni tanlang:\nПожалуйста, выберите язык:\nPlease choose language:",
         reply_markup=lang_menu)
+
+async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if user_id in user_anketa:
+        await process_anketa(update, context)
+    else:
+        await update.message.reply_text(
+            "Rasm qabul qilindi, lekin hozir anketa to'ldirilmayapti.",
+            reply_markup=get_menu(user_id))
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -719,6 +747,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(anketa_callback, pattern="^anketa_"))
     app.add_handler(CallbackQueryHandler(kechikish_callback, pattern="^kechik_"))
+    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     logger.info("Bot ishga tushdi!")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
